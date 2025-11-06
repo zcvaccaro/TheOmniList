@@ -1,4 +1,37 @@
-# Getting Started with Create React App
+# OmniList: Your Ultimate Watchlist
+
+OmniList is a web application designed to help you keep track of movies, TV shows, and books you want to watch or read. It provides personalized recommendations based on your lists and allows you to explore popular and upcoming content.
+
+This project was built with React and utilizes the Chakra UI component library. It fetches data from The Movie Database (TMDB), The New York Times, and Google Books APIs.
+
+## Features
+
+- **Unified Search**: Search for movies, TV shows, and books all in one place.
+- **Watchlists**: Maintain separate lists for movies, TV shows, and books.
+- **Personalized Recommendations**: Get "For You" suggestions based on the items in your lists.
+- **Discover**: Browse bestsellers from The New York Times and see popular and upcoming releases.
+
+## Setup and Installation
+
+To run this project locally, follow these steps:
+
+1.  **Clone the repository:**
+    `git clone https://github.com/your-username/OmniList.git`
+2.  **Navigate to the project directory:**
+    `cd OmniList`
+3.  **Install dependencies:**
+    `npm install`
+4.  **Set up environment variables:**
+    Create a `.env` file in the root of the project and add your API keys. You can use the `.env.example` file as a template:
+    ```
+    REACT_APP_TMDB_API_KEY=your_tmdb_api_key_here
+    REACT_APP_NYT_API_KEY=your_new_york_times_api_key_here
+    REACT_APP_GOOGLE_BOOKS_API_KEY=your_google_books_api_key_here
+    ```
+5.  **Start the development server:**
+    `npm start`
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
