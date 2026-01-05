@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/OmniList/static/css/main.43264640.css",
+    "main.js": "/OmniList/static/js/main.b3106341.js",
+    "index.html": "/OmniList/index.html",
+    "main.43264640.css.map": "/OmniList/static/css/main.43264640.css.map",
+    "main.b3106341.js.map": "/OmniList/static/js/main.b3106341.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.43264640.css",
+    "static/js/main.b3106341.js"
+  ]
+}
