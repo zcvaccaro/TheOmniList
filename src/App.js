@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Container, VStack, SimpleGrid, useToast } from '@chakra-ui/react';
+import { Container, VStack, SimpleGrid, useToast, Spinner, Text } from '@chakra-ui/react';
 
 import Homepage from './components/Homepage';
 import Header from './components/Header';
@@ -21,7 +21,7 @@ import NavigateToSearch from './NavigateToSearch';
 import { getWatchlist, saveWatchlist, getShowWatchlist, saveShowWatchlist } from './api/localStorage';
 import { searchMovies, searchMulti, getPersonMovieCredits } from './api/tmdb';
 import { searchTvShows } from './api/tmdb_tv';
-import { searchBooks } from './components/Books/bookApi';
+import { searchBooks } from './api/bookApi';
 
 function App() {
   const [searchResults, setSearchResults] = useState([]);
@@ -31,6 +31,7 @@ function App() {
   const [selectedShow, setSelectedShow] = useState(null);
   const [readingList, setReadingList] = useState(() => JSON.parse(localStorage.getItem('readingList')) || []);
 
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [needsNav, setNeedsNav] = useState(false);
   const toast = useToast();
@@ -68,6 +69,7 @@ function App() {
   const handleSearch = async (query, category = 'all') => {
     if (!query.trim()) return;
     setSearchResults([]); // Clear previous results immediately
+    setIsSearchLoading(true);
     try {
       let results = [];
       if (category === 'all') {
@@ -160,6 +162,8 @@ function App() {
         duration: 4000,
         isClosable: true,
       });
+    } finally {
+      setIsSearchLoading(false);
     }
   };
 
@@ -368,28 +372,35 @@ function App() {
           <Route
             path="/search"
             element={
-              <VStack spacing={6} pt={6} pb={10} overflowX="hidden">
-                <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={6} w="100%">
-                  {searchResults.map((item) => (
-                    <SearchResultCard
-                      key={`${item.type}-${item.id || item.isbn}`}
-                      item={item}
-                      onAdd={() => handleAddItemToWatchlist(item)}
-                      onRemove={(itemToRemove) => {
-                        if (itemToRemove.type === 'movie') handleRemoveMovieFromWatchlist(itemToRemove.id);
-                        if (itemToRemove.type === 'tv') handleRemoveShowFromWatchlist(itemToRemove.id);
-                        if (itemToRemove.type === 'book') handleRemoveBookFromWatchlist(itemToRemove.isbn);
-                      }}
-                      onClick={handleSelectItem}
-                      inWatchlist={
-                        (item.type === 'movie' && movieWatchlistIds.has(item.id)) ||
-                        (item.type === 'tv' && showWatchlistIds.has(item.id)) ||
-                        (item.type === 'book' && readingListIsbns.has(item.isbn))
-                      }
-                    />
-                  ))}
-                </SimpleGrid>
-              </VStack>
+              isSearchLoading ? (
+                <VStack justify="center" align="center" height="50vh">
+                  <Spinner size="xl" />
+                  <Text>Searching...</Text>
+                </VStack>
+              ) : (
+                <VStack spacing={6} pt={6} pb={10} overflowX="hidden">
+                  <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={6} w="100%">
+                    {searchResults.map((item) => (
+                      <SearchResultCard
+                        key={`${item.type}-${item.id || item.isbn}`}
+                        item={item}
+                        onAdd={() => handleAddItemToWatchlist(item)}
+                        onRemove={(itemToRemove) => {
+                          if (itemToRemove.type === 'movie') handleRemoveMovieFromWatchlist(itemToRemove.id);
+                          if (itemToRemove.type === 'tv') handleRemoveShowFromWatchlist(itemToRemove.id);
+                          if (itemToRemove.type === 'book') handleRemoveBookFromWatchlist(itemToRemove.isbn);
+                        }}
+                        onClick={handleSelectItem}
+                        inWatchlist={
+                          (item.type === 'movie' && movieWatchlistIds.has(item.id)) ||
+                          (item.type === 'tv' && showWatchlistIds.has(item.id)) ||
+                          (item.type === 'book' && readingListIsbns.has(item.isbn))
+                        }
+                      />
+                    ))}
+                  </SimpleGrid>
+                </VStack>
+              )
             }
           />
         </Routes>

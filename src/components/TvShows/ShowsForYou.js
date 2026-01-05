@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Heading, SimpleGrid, Spinner, Text, Select } from '@chakra-ui/react';
+import { Box, Heading, SimpleGrid, Spinner, Text, Select, VStack } from '@chakra-ui/react';
 import TVCard from './TVCard';
 
 const API_KEY = process.env.REACT_APP_TMDB_API_KEY;
@@ -127,7 +127,10 @@ function ShowsForYou({ watchlist, onAdd, onRemove, onClick }) {
       </Box>
 
       {loading && filteredRecommendations.length === 0 ? (
-        <Spinner size="xl" thickness="4px" color="blue.500" />
+        <VStack justify="center" align="center" height="50vh">
+          <Spinner size="xl" />
+          <Text>Loading Recommendations...</Text>
+        </VStack>
       ) : filteredRecommendations.length === 0 ? (
         <Text textAlign="center" color="gray.500">
           Add shows to your watchlist to get personalized recommendations!

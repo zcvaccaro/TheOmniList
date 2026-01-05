@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { getPopularTvShows } from '../../api/tmdb_tv';
 import TVCard from './TVCard';
-import { SimpleGrid, Box, Heading, Select } from '@chakra-ui/react';
+import { SimpleGrid, Box, Heading, Select, Spinner, VStack, Text } from '@chakra-ui/react';
 
 const API_KEY = process.env.REACT_APP_TMDB_API_KEY;
 
-const ShowPopular = ({ onAdd, onClick }) => {
+const ShowPopular = ({ watchlist, onAdd, onRemove, onClick }) => {
   const [shows, setShows] = useState([]);
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPopularShows = async () => {
+      setLoading(true);
       try {
         const response = await getPopularTvShows();
         setShows(response.results);
       } catch (error) {
         console.error('Error fetching popular TV shows:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -40,6 +44,8 @@ const ShowPopular = ({ onAdd, onClick }) => {
       )
     : shows;
 
+  const watchlistIds = new Set(watchlist.map(s => s.id));
+
   return (
     <Box pt={6}>
       <Heading as="h2" size="xl" mb={6} textAlign="center">
@@ -58,16 +64,25 @@ const ShowPopular = ({ onAdd, onClick }) => {
           ))}
         </Select>
       </Box>
-      <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={6}>
-        {filteredShows.map(show => (
-          <TVCard
-            key={show.id}
-            show={show}
-            onAdd={onAdd}
-            onClick={() => onClick(show)}
-          />
-        ))}
-      </SimpleGrid>
+      {loading ? (
+        <VStack justify="center" align="center" height="50vh">
+          <Spinner size="xl" />
+          <Text>Loading Popular Shows...</Text>
+        </VStack>
+      ) : (
+        <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={6}>
+          {filteredShows.map(show => (
+            <TVCard
+              key={show.id}
+              show={show}
+              onAdd={onAdd}
+              onRemove={onRemove}
+              onClick={() => onClick(show)}
+              inWatchlist={watchlistIds.has(show.id)}
+            />
+          ))}
+        </SimpleGrid>
+      )}
     </Box>
   );
 };

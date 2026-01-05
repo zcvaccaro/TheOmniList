@@ -53,6 +53,7 @@ function MovieWatchlist({ watchlist, onRemove, onSelect }) {
               movie={movie}
               onRemove={onRemove}
               onClick={() => onSelect(movie)}
+              inWatchlist={true}
             />
           ))}
         </SimpleGrid>

@@ -91,10 +91,10 @@ function ShowModal({ show, isOpen, onClose, onAddToWatchlist, onRemoveFromWatchl
         transition={{ duration: 0.3 }}
       >
         <ModalHeader>{show?.name}</ModalHeader>
-        <ModalCloseButton />
+      <ModalCloseButton />
         <ModalBody pb={6}>
           {loading ? (
-            <Spinner size="lg" color="blue.500" />
+            <Spinner size="xl" thickness="4px" color="blue.500" />
           ) : details ? (
             <VStack align="start" spacing={4} color={bodyTextColor}>
               <Text fontSize="sm" color={secondaryTextColor}>

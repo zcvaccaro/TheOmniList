@@ -1,19 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Image,
-  Text,
-  VStack,
-  SimpleGrid,
-  Spinner,
-  Heading,
-  Select,
-  Button,
-} from '@chakra-ui/react';
+import { Box, SimpleGrid, Spinner, Heading, Select, VStack, Text } from '@chakra-ui/react';
+import MovieCard from './MovieCard';
 
 const API_KEY = process.env.REACT_APP_TMDB_API_KEY;
 
-function MovieUpcomingReleases({ onAddToWatchlist, onSelect }) {
+function MovieUpcomingReleases({ watchlist, onAddToWatchlist, onRemoveFromWatchlist, onSelect }) {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [genres, setGenres] = useState([]);
@@ -76,6 +67,8 @@ function MovieUpcomingReleases({ onAddToWatchlist, onSelect }) {
     ? movies.filter((movie) => movie.genre_ids?.includes(parseInt(selectedGenre)))
     : movies;
 
+  const watchlistIds = new Set(watchlist.map(m => m.id));
+
   return (
     <Box pt={6}>
       <Heading size="xl" mb={6} textAlign="center">
@@ -97,58 +90,25 @@ function MovieUpcomingReleases({ onAddToWatchlist, onSelect }) {
       </Box>
 
       {loading ? (
-        <Spinner size="xl" thickness="4px" color="blue.500" />
+        <VStack justify="center" align="center" height="50vh">
+          <Spinner size="xl" />
+          <Text>Loading Upcoming Movies...</Text>
+        </VStack>
       ) : (
         <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={6}>
           {filteredMovies.map((movie) => (
-            <Box
+            <MovieCard
               key={movie.id}
-              borderWidth="1px"
-              borderRadius="lg"
-              overflow="hidden"
-              p={4}
-              cursor="pointer"
-              _hover={{ boxShadow: 'lg', transform: 'scale(1.02)' }}
-              transition="all 0.2s"
+              movie={{
+                ...movie,
+                poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : undefined,
+                rating: movie.vote_average,
+              }}
+              onAdd={onAddToWatchlist}
+              onRemove={onRemoveFromWatchlist}
               onClick={() => onSelect(movie)}
-            >
-              <VStack spacing={3}>
-                <Image
-                  src={
-                    movie.poster_path
-                      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                      : 'https://via.placeholder.com/200x300?text=No+Image'
-                  }
-                  alt={movie.title}
-                  boxSize="200px"
-                  objectFit="cover"
-                />
-                <Text fontWeight="bold" textAlign="center">
-                  {movie.title}
-                </Text>
-                <Text fontSize="sm" color="gray.500">
-                  Release: {movie.release_date}
-                </Text>
-                <Button
-                  size="sm"
-                  colorScheme="green"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const movieToAdd = {
-                      id: movie.id,
-                      title: movie.title,
-                      poster: movie.poster_path
-                        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                        : 'https://via.placeholder.com/200x300?text=No+Image',
-                      rating: movie.vote_average || null,
-                    };
-                    onAddToWatchlist(movieToAdd);
-                  }}
-                >
-                  Add to Watchlist
-                </Button>
-              </VStack>
-            </Box>
+              inWatchlist={watchlistIds.has(movie.id)}
+            />
           ))}
         </SimpleGrid>
       )}

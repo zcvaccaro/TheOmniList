@@ -72,7 +72,10 @@ function BooksForYou({ readingList, onAdd, onRemove, onClick }) {
       </Heading>
 
       {loading && recommendations.length === 0 ? (
-        <VStack><Spinner size="xl" /></VStack>
+        <VStack justify="center" align="center" height="50vh">
+          <Spinner size="xl" />
+          <Text>Loading Recommendations...</Text>
+        </VStack>
       ) : recommendations.length === 0 ? (
         <Text textAlign="center" color="gray.500">
           Add books to your reading list to get personalized recommendations!
