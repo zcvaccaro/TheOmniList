@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/OmniList/static/css/main.43264640.css",
-    "main.js": "/OmniList/static/js/main.b3106341.js",
-    "index.html": "/OmniList/index.html",
-    "main.43264640.css.map": "/OmniList/static/css/main.43264640.css.map",
-    "main.b3106341.js.map": "/OmniList/static/js/main.b3106341.js.map"
+    "main.css": "/TheOmniList/static/css/main.43264640.css",
+    "main.js": "/TheOmniList/static/js/main.7b6dcb9d.js",
+    "index.html": "/TheOmniList/index.html",
+    "main.43264640.css.map": "/TheOmniList/static/css/main.43264640.css.map",
+    "main.7b6dcb9d.js.map": "/TheOmniList/static/js/main.7b6dcb9d.js.map"
   },
   "entrypoints": [
     "static/css/main.43264640.css",
-    "static/js/main.b3106341.js"
+    "static/js/main.7b6dcb9d.js"
   ]
 }
