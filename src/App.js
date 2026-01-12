@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Container, VStack, SimpleGrid, useToast, Spinner, Text } from '@chakra-ui/react';
+import { Container, VStack, SimpleGrid, useToast, Spinner, Text, useColorMode } from '@chakra-ui/react';
 
 import Homepage from './components/Homepage';
 import Header from './components/Header';
@@ -35,6 +35,12 @@ function App() {
   const [selectedBook, setSelectedBook] = useState(null);
   const [needsNav, setNeedsNav] = useState(false);
   const toast = useToast();
+  const { setColorMode } = useColorMode();
+
+  // Force dark mode on initial load
+  useEffect(() => {
+    setColorMode('dark');
+  }, [setColorMode]);
 
   useEffect(() => {
     saveWatchlist(movieWatchlist);

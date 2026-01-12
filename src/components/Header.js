@@ -17,6 +17,7 @@ import {
   InputGroup,
   HStack,
   useColorMode,
+  useColorModeValue,
   Accordion,
   AccordionItem,
   AccordionButton,
@@ -38,6 +39,10 @@ function Header({ onSearch }) {
   const location = useLocation();
 
   const { colorMode, toggleColorMode } = useColorMode();
+  const menuBg = useColorModeValue('white', 'gray.700');
+  const menuTextColor = useColorModeValue('gray.800', 'white');
+  const menuBorderColor = useColorModeValue('gray.200', 'gray.700');
+  const menuItemHoverBg = useColorModeValue('gray.100', 'gray.600');
 
   const searchCategories = [
     { id: 'all', name: 'All' },
@@ -131,12 +136,22 @@ function Header({ onSearch }) {
               variant="outline"
               minW="130px" // Ensure enough space for text and icon
               pr={2}
+              color="white"
+              borderColor="whiteAlpha.600"
+              _hover={{ bg: 'whiteAlpha.200' }}
+              _active={{ bg: 'whiteAlpha.300' }}
             >
               {selectedCategory.name}
             </MenuButton>
-            <MenuList>
+            <MenuList bg={menuBg} borderColor={menuBorderColor} border="1px solid">
               {searchCategories.map((cat) => (
-                <MenuItem key={cat.id} onClick={() => setSelectedCategory(cat)}>
+                <MenuItem 
+                  key={cat.id} 
+                  onClick={() => setSelectedCategory(cat)}
+                  color={menuTextColor}
+                  _hover={{ bg: menuItemHoverBg }}
+                  _focus={{ bg: menuItemHoverBg }}
+                >
                   {cat.name}
                 </MenuItem>
               ))}
