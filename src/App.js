@@ -92,8 +92,12 @@ function App() {
           }));
         }
 
-        const bookResults = await searchBooks(query);
-        results = results.concat(bookResults);
+        try {
+          const bookResults = await searchBooks(query);
+          results = results.concat(bookResults);
+        } catch (error) {
+          console.warn("Book search failed:", error);
+        }
       } else if (category === 'director') {
         const multiResults = await searchMulti(query);
         const personResult = multiResults.results?.find(r => r.media_type === 'person');
@@ -157,7 +161,7 @@ function App() {
       console.error('Error during search:', error);
       toast({
         title: 'Search failed.',
-        description: 'Something went wrong while searching.',
+        description: error.message || 'Something went wrong while searching.',
         status: 'error',
         duration: 4000,
         isClosable: true,
@@ -275,7 +279,7 @@ function App() {
   const readingListIsbns = new Set(readingList.map(b => b.isbn));
 
   return (
-    <Router>
+    <Router basename={process.env.PUBLIC_URL}>
       {needsNav && <NavigateToSearch onNavigate={() => setNeedsNav(false)} />}
       <Header onSearch={handleSearch} />
 
