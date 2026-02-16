@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Heading, SimpleGrid, Spinner, Text, Select, VStack } from '@chakra-ui/react';
+import { Box, Heading, SimpleGrid, Spinner, Text, Select, VStack, HStack, Button } from '@chakra-ui/react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import TVCard from './TVCard';
 
 const API_KEY = process.env.REACT_APP_TMDB_API_KEY;
@@ -10,6 +11,7 @@ function ShowsForYou({ watchlist, onAdd, onRemove, onClick }) {
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState('');
   const prevWatchlistRef = useRef([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const prevWatchlist = prevWatchlistRef.current;
@@ -26,11 +28,17 @@ function ShowsForYou({ watchlist, onAdd, onRemove, onClick }) {
       try {
         const allRecs = await Promise.all(
           newShows.map(async (show) => {
-            const res = await fetch(
-              `https://api.themoviedb.org/3/tv/${show.id}/recommendations?api_key=${API_KEY}&language=en-US&page=1`
-            );
-            const data = await res.json();
-            return data.results || [];
+            const totalPagesToFetch = 3;
+            const pagePromises = [];
+            for (let page = 1; page <= totalPagesToFetch; page++) {
+              pagePromises.push(
+                fetch(
+                  `https://api.themoviedb.org/3/tv/${show.id}/recommendations?api_key=${API_KEY}&language=en-US&page=${page}`
+                ).then((res) => res.json())
+              );
+            }
+            const pagesData = await Promise.all(pagePromises);
+            return pagesData.flatMap((data) => data.results || []);
           })
         );
 
@@ -84,11 +92,33 @@ function ShowsForYou({ watchlist, onAdd, onRemove, onClick }) {
     fetchGenres();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedGenre, watchlist]);
+
   const filteredRecommendations = selectedGenre
     ? recommendations.filter(
         (show) => show.genre_ids && show.genre_ids.includes(parseInt(selectedGenre))
       )
     : recommendations;
+
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(filteredRecommendations.length / itemsPerPage);
+  const currentShows = filteredRecommendations.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const watchlistIds = new Set(watchlist.map(s => s.id));
 
@@ -136,8 +166,9 @@ function ShowsForYou({ watchlist, onAdd, onRemove, onClick }) {
           Add shows to your watchlist to get personalized recommendations!
         </Text>
       ) : (
+        <>
         <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={6}>
-          {filteredRecommendations.map((show) => (
+          {currentShows.map((show) => (
             <TVCard
               key={show.id}
               show={show}
@@ -148,6 +179,18 @@ function ShowsForYou({ watchlist, onAdd, onRemove, onClick }) {
             />
           ))}
         </SimpleGrid>
+          <HStack spacing={4} justify="center" mt={8} mb={10}>
+            <Button onClick={handlePrevPage} isDisabled={currentPage === 1} aria-label="Previous Page">
+              <ChevronLeftIcon />
+            </Button>
+            <Text>
+              {currentPage} of {totalPages}
+            </Text>
+            <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} aria-label="Next Page">
+              <ChevronRightIcon />
+            </Button>
+          </HStack>
+        </>
       )}
     </Box>
   );

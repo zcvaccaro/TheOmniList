@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, SimpleGrid, Spinner, Heading, Select, VStack, Text } from '@chakra-ui/react';
+import { Box, SimpleGrid, Spinner, Heading, Select, VStack, Text, HStack, Button } from '@chakra-ui/react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import MovieCard from './MovieCard';
 
 const API_KEY = process.env.REACT_APP_TMDB_API_KEY;
@@ -9,6 +10,7 @@ function MovieUpcomingReleases({ watchlist, onAddToWatchlist, onRemoveFromWatchl
   const [loading, setLoading] = useState(true);
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     async function fetchGenres() {
@@ -63,9 +65,31 @@ function MovieUpcomingReleases({ watchlist, onAddToWatchlist, onRemoveFromWatchl
     fetchUpcoming();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedGenre]);
+
   const filteredMovies = selectedGenre
     ? movies.filter((movie) => movie.genre_ids?.includes(parseInt(selectedGenre)))
     : movies;
+
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(filteredMovies.length / itemsPerPage);
+  const currentMovies = filteredMovies.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const watchlistIds = new Set(watchlist.map(m => m.id));
 
@@ -95,8 +119,9 @@ function MovieUpcomingReleases({ watchlist, onAddToWatchlist, onRemoveFromWatchl
           <Text>Loading Upcoming Movies...</Text>
         </VStack>
       ) : (
+        <>
         <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={6}>
-          {filteredMovies.map((movie) => (
+          {currentMovies.map((movie) => (
             <MovieCard
               key={movie.id}
               movie={{
@@ -111,6 +136,18 @@ function MovieUpcomingReleases({ watchlist, onAddToWatchlist, onRemoveFromWatchl
             />
           ))}
         </SimpleGrid>
+          <HStack spacing={4} justify="center" mt={8} mb={10}>
+            <Button onClick={handlePrevPage} isDisabled={currentPage === 1} aria-label="Previous Page">
+              <ChevronLeftIcon />
+            </Button>
+            <Text>
+              {currentPage} of {totalPages}
+            </Text>
+            <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} aria-label="Next Page">
+              <ChevronRightIcon />
+            </Button>
+          </HStack>
+        </>
       )}
     </Box>
   );

@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Heading, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react';
-import { searchBooks } from './bookApi';
+import { Box, Heading, SimpleGrid, Spinner, Text, VStack, HStack, Button } from '@chakra-ui/react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
+import { searchBooks } from '../../api/bookApi';
 import BookCard from './BookCard';
 
 function BooksForYou({ readingList, onAdd, onRemove, onClick }) {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const prevReadingListRef = useRef([]);
 
   useEffect(() => {
@@ -27,9 +29,18 @@ function BooksForYou({ readingList, onAdd, onRemove, onClick }) {
           .map(book => book.author ? book.author.split(',')[0] : null) // Get first author
           .filter(author => author && author !== 'Unknown Author');
 
-        if (authorQueries.length === 0) return;
+        const genreQueries = booksForRecs
+          .flatMap(book => book.genres || [])
+          .filter(Boolean);
 
-        const uniqueQueries = [...new Set(authorQueries)];
+        const allQueries = [...authorQueries, ...genreQueries];
+
+        if (allQueries.length === 0) {
+          setLoading(false);
+          return;
+        }
+
+        const uniqueQueries = [...new Set(allQueries)];
 
         const allRecs = await Promise.all(
           uniqueQueries.map(query => searchBooks(query))
@@ -63,6 +74,24 @@ function BooksForYou({ readingList, onAdd, onRemove, onClick }) {
     fetchNewRecommendations();
   }, [readingList]);
 
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(recommendations.length / itemsPerPage);
+  const currentBooks = recommendations.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const readingListIsbns = new Set(readingList.map(b => b.isbn));
 
   return (
@@ -81,8 +110,9 @@ function BooksForYou({ readingList, onAdd, onRemove, onClick }) {
           Add books to your reading list to get personalized recommendations!
         </Text>
       ) : (
+        <>
         <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={6}>
-          {recommendations.map((book) => (
+          {currentBooks.map((book) => (
             <BookCard
               key={book.isbn}
               book={book}
@@ -92,6 +122,18 @@ function BooksForYou({ readingList, onAdd, onRemove, onClick }) {
               inWatchlist={readingListIsbns.has(book.isbn)} />
           ))}
         </SimpleGrid>
+            <HStack spacing={4} justify="center" mt={8} mb={10}>
+              <Button onClick={handlePrevPage} isDisabled={currentPage === 1} aria-label="Previous Page">
+                <ChevronLeftIcon />
+              </Button>
+              <Text>
+                {currentPage} of {totalPages}
+              </Text>
+              <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} aria-label="Next Page">
+                <ChevronRightIcon />
+              </Button>
+            </HStack>
+        </>
       )}
     </Box>
   );

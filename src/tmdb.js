@@ -15,9 +15,9 @@ const fetchFromTMDB = async (endpoint) => {
   return response.json();
 };
 
-export const searchMovies = (query) => fetchFromTMDB(`/search/movie?query=${encodeURIComponent(query)}`);
+export const searchMovies = (query, page = 1) => fetchFromTMDB(`/search/movie?query=${encodeURIComponent(query)}&page=${page}`);
 
-export const searchMulti = (query) => fetchFromTMDB(`/search/multi?query=${encodeURIComponent(query)}`);
+export const searchMulti = (query, page = 1) => fetchFromTMDB(`/search/multi?query=${encodeURIComponent(query)}&page=${page}`);
 
 export const getMovieDetails = (movieId) => fetchFromTMDB(`/movie/${movieId}`);
 
@@ -25,7 +25,7 @@ export const getMovieVideos = (movieId) => fetchFromTMDB(`/movie/${movieId}/vide
 
 export const getMovieWatchProviders = (movieId) => fetchFromTMDB(`/movie/${movieId}/watch/providers`);
 
-export const getMovieRecommendations = (movieId) => fetchFromTMDB(`/movie/${movieId}/recommendations`);
+export const getMovieRecommendations = (movieId, page = 1) => fetchFromTMDB(`/movie/${movieId}/recommendations?page=${page}`);
 
 export const getUpcomingMovies = (page = 1) => fetchFromTMDB(`/movie/upcoming?page=${page}`);
 

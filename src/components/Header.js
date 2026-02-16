@@ -31,6 +31,13 @@ import {
 import { HamburgerIcon, SunIcon, MoonIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 
+const searchCategories = [
+  { id: 'all', name: 'All' },
+  { id: 'movie', name: 'Movies' },
+  { id: 'tv', name: 'TV Shows' },
+  { id: 'book', name: 'Books' },
+];
+
 function Header({ onSearch }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [query, setQuery] = React.useState('');
@@ -44,12 +51,23 @@ function Header({ onSearch }) {
   const menuBorderColor = useColorModeValue('gray.200', 'gray.700');
   const menuItemHoverBg = useColorModeValue('gray.100', 'gray.600');
 
-  const searchCategories = [
-    { id: 'all', name: 'All' },
-    { id: 'movie', name: 'Movies' },
-    { id: 'tv', name: 'TV Shows' },
-    { id: 'book', name: 'Books' },
-  ];
+  React.useEffect(() => {
+    // On mount or location change, if we are on the search page, restore the query
+    if (location.pathname === '/search') {
+      const savedQuery = sessionStorage.getItem('lastSearchQuery');
+      const savedCategory = sessionStorage.getItem('lastSearchCategory');
+
+      if (savedQuery) {
+        setQuery(savedQuery);
+      }
+      if (savedCategory) {
+        const categoryObject = searchCategories.find(c => c.id === savedCategory);
+        if (categoryObject) {
+          setSelectedCategory(categoryObject);
+        }
+      }
+    }
+  }, [location.pathname]); // Rerun when path changes
 
   const handleSearch = (category) => {
     if (query.trim() && category) {

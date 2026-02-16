@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Container, VStack, SimpleGrid, useToast, Spinner, Text, useColorMode } from '@chakra-ui/react';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { Container, VStack, SimpleGrid, useToast, Spinner, Text, useColorMode, HStack, Button } from '@chakra-ui/react';
 
 import Homepage from './components/Homepage';
 import Header from './components/Header';
@@ -18,6 +18,7 @@ import ReadingList from './components/Books/ReadingList';
 import BooksForYou from './components/Books/BooksForYou';
 import SearchResultCard from './components/SearchResultCard';
 import NavigateToSearch from './NavigateToSearch';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { getWatchlist, saveWatchlist, getShowWatchlist, saveShowWatchlist } from './api/localStorage';
 import { searchMovies, searchMulti, getPersonMovieCredits } from './api/tmdb';
 import { searchTvShows } from './api/tmdb_tv';
@@ -31,6 +32,7 @@ function App() {
   const [selectedShow, setSelectedShow] = useState(null);
   const [readingList, setReadingList] = useState(() => JSON.parse(localStorage.getItem('readingList')) || []);
 
+  const [currentPage, setCurrentPage] = useState(1);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [needsNav, setNeedsNav] = useState(false);
@@ -56,7 +58,7 @@ function App() {
 
   // Helper to fetch multiple pages of results from TMDB
   const fetchAllPages = async (searchFunction, query) => {
-    const totalPagesToFetch = 3; // Fetch first 3 pages
+    const totalPagesToFetch = 10; // Fetch first 10 pages
     const pagePromises = [];
     for (let page = 1; page <= totalPagesToFetch; page++) {
       pagePromises.push(searchFunction(query, page));
@@ -64,9 +66,16 @@ function App() {
 
     const pages = await Promise.all(pagePromises);
     let allResults = [];
+    const seenIds = new Set();
+
     pages.forEach(pageData => {
       if (pageData && pageData.results) {
-        allResults = allResults.concat(pageData.results);
+        pageData.results.forEach(item => {
+          if (!seenIds.has(item.id)) {
+            seenIds.add(item.id);
+            allResults.push(item);
+          }
+        });
       }
     });
     return allResults;
@@ -74,36 +83,30 @@ function App() {
 
   const handleSearch = async (query, category = 'all') => {
     if (!query.trim()) return;
+    sessionStorage.setItem('lastSearchQuery', query);
+    sessionStorage.setItem('lastSearchCategory', category);
+    setCurrentPage(1); // Reset to first page on new search
     setSearchResults([]); // Clear previous results immediately
     setIsSearchLoading(true);
     try {
       let results = [];
       if (category === 'all') {
-        const multiResults = await searchMulti(query);
-        const personResult = multiResults.results?.find(r => r.media_type === 'person');
+        // Fetch movies, TV shows, and books in parallel for maximum results
+        const [movieResults, tvResults, bookResults] = await Promise.all([
+          fetchAllPages(searchMovies, query),
+          fetchAllPages(searchTvShows, query),
+          searchBooks(query)
+        ]);
 
-        if (personResult) {
-          // If a person is found, get their movie credits and filter by director.
-          const credits = await getPersonMovieCredits(personResult.id);
-          results = credits.crew
-            .filter(movie => movie.job === 'Director')
-            .map(movie => ({ ...movie, type: 'movie' }));
-        } else {
-          // Fetch multiple pages for general 'all' search
-          results = multiResults.results.filter(
-            item => item.media_type === 'movie' || item.media_type === 'tv'
-          ).map(item => ({
-            ...item,
-            type: item.media_type, // 'movie' or 'tv'
-          }));
-        }
+        const movies = movieResults
+          .filter(item => item.poster_path)
+          .map(item => ({ ...item, type: 'movie' }));
 
-        try {
-          const bookResults = await searchBooks(query);
-          results = results.concat(bookResults);
-        } catch (error) {
-          console.warn("Book search failed:", error);
-        }
+        const shows = tvResults
+          .filter(item => item.poster_path)
+          .map(item => ({ ...item, type: 'tv' }));
+
+        results = [...movies, ...shows, ...bookResults];
       } else if (category === 'director') {
         const multiResults = await searchMulti(query);
         const personResult = multiResults.results?.find(r => r.media_type === 'person');
@@ -118,13 +121,13 @@ function App() {
         results = results.concat(bookResults);
       } else if (category === 'movie') {
         const movieResults = await fetchAllPages(searchMovies, query);
-        results = results.concat(movieResults.map(movie => ({
+        results = results.concat(movieResults.filter(m => m.poster_path).map(movie => ({
             ...movie,
             type: 'movie',
         })));
       } else if (category === 'tv') {
         const tvResults = await fetchAllPages(searchTvShows, query);
-        results = results.concat(tvResults.map(show => ({
+        results = results.concat(tvResults.filter(t => t.poster_path).map(show => ({
             ...show,
             type: 'tv',
         })));
@@ -176,6 +179,15 @@ function App() {
       setIsSearchLoading(false);
     }
   };
+
+  useEffect(() => {
+    const savedQuery = sessionStorage.getItem('lastSearchQuery');
+    const savedCategory = sessionStorage.getItem('lastSearchCategory');
+    if (window.location.hash.includes('/search') && savedQuery) {
+      handleSearch(savedQuery, savedCategory || 'all');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handlePersonSearch = (name, category) => {
     handleCloseModal();
@@ -284,8 +296,27 @@ function App() {
   const showWatchlistIds = new Set(showWatchlist.map(s => s.id));
   const readingListIsbns = new Set(readingList.map(b => b.isbn));
 
+  // Pagination Logic for Search Results
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(searchResults.length / itemsPerPage) || 1;
+  const currentSearchResults = searchResults.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <Router basename={process.env.PUBLIC_URL}>
+    <Router>
       {needsNav && <NavigateToSearch onNavigate={() => setNeedsNav(false)} />}
       <Header onSearch={handleSearch} />
 
@@ -390,7 +421,7 @@ function App() {
               ) : (
                 <VStack spacing={6} pt={6} pb={10} overflowX="hidden">
                   <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={6} w="100%">
-                    {searchResults.map((item) => (
+                    {currentSearchResults.map((item) => (
                       <SearchResultCard
                         key={`${item.type}-${item.id || item.isbn}`}
                         item={item}
@@ -409,6 +440,18 @@ function App() {
                       />
                     ))}
                   </SimpleGrid>
+                  
+                  <HStack spacing={4} justify="center" mt={8} mb={10}>
+                    <Button onClick={handlePrevPage} isDisabled={currentPage === 1} aria-label="Previous Page">
+                      <ChevronLeftIcon />
+                    </Button>
+                    <Text>
+                      {currentPage} of {totalPages}
+                    </Text>
+                    <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} aria-label="Next Page">
+                      <ChevronRightIcon />
+                    </Button>
+                  </HStack>
                 </VStack>
               )
             }

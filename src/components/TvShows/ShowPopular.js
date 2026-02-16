@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getPopularTvShows } from '../../api/tmdb_tv';
 import TVCard from './TVCard';
-import { SimpleGrid, Box, Heading, Select, Spinner, VStack, Text } from '@chakra-ui/react';
+import { SimpleGrid, Box, Heading, Select, Spinner, VStack, Text, HStack, Button } from '@chakra-ui/react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 
 const API_KEY = process.env.REACT_APP_TMDB_API_KEY;
 
@@ -10,6 +11,7 @@ const ShowPopular = ({ watchlist, onAdd, onRemove, onClick }) => {
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchPopularShows = async () => {
@@ -38,11 +40,33 @@ const ShowPopular = ({ watchlist, onAdd, onRemove, onClick }) => {
     fetchGenres();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedGenre]);
+
   const filteredShows = selectedGenre
     ? shows.filter((show) =>
         show.genre_ids && show.genre_ids.includes(parseInt(selectedGenre))
       )
     : shows;
+
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(filteredShows.length / itemsPerPage);
+  const currentShows = filteredShows.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const watchlistIds = new Set(watchlist.map(s => s.id));
 
@@ -70,8 +94,9 @@ const ShowPopular = ({ watchlist, onAdd, onRemove, onClick }) => {
           <Text>Loading Popular Shows...</Text>
         </VStack>
       ) : (
+        <>
         <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={6}>
-          {filteredShows.map(show => (
+          {currentShows.map(show => (
             <TVCard
               key={show.id}
               show={show}
@@ -82,6 +107,18 @@ const ShowPopular = ({ watchlist, onAdd, onRemove, onClick }) => {
             />
           ))}
         </SimpleGrid>
+          <HStack spacing={4} justify="center" mt={8} mb={10}>
+            <Button onClick={handlePrevPage} isDisabled={currentPage === 1} aria-label="Previous Page">
+              <ChevronLeftIcon />
+            </Button>
+            <Text>
+              {currentPage} of {totalPages}
+            </Text>
+            <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} aria-label="Next Page">
+              <ChevronRightIcon />
+            </Button>
+          </HStack>
+        </>
       )}
     </Box>
   );

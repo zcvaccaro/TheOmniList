@@ -8,8 +8,11 @@ import {
   Heading,
   Select,
   Flex,
+  HStack,
+  Button,
 } from '@chakra-ui/react';
-import { fetchBestsellersWithDetails } from './bookApi';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
+import { fetchBestsellersWithDetails } from '../../api/bookApi';
 import BookCard from './BookCard';
 
 const bestsellerLists = [
@@ -28,6 +31,7 @@ const BestsellersList = ({ onAdd, onRemove, onClick, watchlist }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedList, setSelectedList] = useState(bestsellerLists[0].value);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleListChange = (event) => {
     setSelectedList(event.target.value);
@@ -38,6 +42,7 @@ const BestsellersList = ({ onAdd, onRemove, onClick, watchlist }) => {
       try {
         setIsLoading(true);
         setError(null);
+        setCurrentPage(1);
         const bookData = await fetchBestsellersWithDetails(selectedList);
         setBooks(bookData);
       } catch (err) {
@@ -50,6 +55,24 @@ const BestsellersList = ({ onAdd, onRemove, onClick, watchlist }) => {
 
     loadBooks();
   }, [selectedList]);
+
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(books.length / itemsPerPage) || 1;
+  const currentBooks = books.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -81,17 +104,30 @@ const BestsellersList = ({ onAdd, onRemove, onClick, watchlist }) => {
         </Select>
       </Flex>
       <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={6}>
-        {books.map((book) => (
-          <BookCard
-            key={book.isbn}
-            book={book}
-            onAdd={onAdd}
-            onRemove={onRemove}
-            onClick={onClick}
-            inWatchlist={watchlistIsbns.has(book.isbn)}
-          />
-        ))}
+        {currentBooks.map((book) => {
+          return (
+            <BookCard
+              key={book.isbn}
+              book={book}
+              onAdd={onAdd}
+              onRemove={onRemove}
+              onClick={onClick}
+              inWatchlist={watchlistIsbns.has(book.isbn)}
+            />
+          );
+        })}
       </SimpleGrid>
+        <HStack spacing={4} justify="center" mt={8} mb={10}>
+          <Button onClick={handlePrevPage} isDisabled={currentPage === 1} aria-label="Previous Page">
+            <ChevronLeftIcon />
+          </Button>
+          <Text>
+            {currentPage} of {totalPages}
+          </Text>
+          <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} aria-label="Next Page">
+            <ChevronRightIcon />
+          </Button>
+        </HStack>
     </Box>
   );
 };

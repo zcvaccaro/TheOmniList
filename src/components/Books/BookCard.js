@@ -6,8 +6,11 @@ import {
   Button,
   VStack,
   Tooltip,
+  HStack,
+  Icon,
   useColorModeValue,
 } from '@chakra-ui/react';
+import { StarIcon } from '@chakra-ui/icons';
 
 const BookCard = ({ book, onAdd, onClick, onRemove, isWatchlist, inWatchlist }) => {
   const bgColor = useColorModeValue('gray.100', 'gray.700');
@@ -44,6 +47,20 @@ const BookCard = ({ book, onAdd, onClick, onRemove, isWatchlist, inWatchlist }) 
           <Text fontSize="sm" color="gray.500" isTruncated width="100%">
             by {book.author}
           </Text>
+          
+          <HStack spacing={1}>
+            {book.averageRating > 0 ? (
+              <>
+                <Icon as={StarIcon} color="yellow.400" w={3} h={3} />
+                <Text fontSize="xs" color="gray.600">
+                  {book.averageRating} ({book.ratingsCount})
+                </Text>
+              </>
+            ) : (
+              <Text fontSize="xs" color="gray.400">No ratings</Text>
+            )}
+          </HStack>
+
           {isWatchlist || inWatchlist ? (
             <Button size="sm" colorScheme="red" onClick={handleRemoveClick} width="100%">
               Remove

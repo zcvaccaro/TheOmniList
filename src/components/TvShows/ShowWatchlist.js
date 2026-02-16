@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text, SimpleGrid, Select } from '@chakra-ui/react';
+import { Box, Text, SimpleGrid, Select, HStack, Button } from '@chakra-ui/react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import TVCard from './TVCard';
 
 const API_KEY = process.env.REACT_APP_TMDB_API_KEY;
@@ -7,6 +8,7 @@ const API_KEY = process.env.REACT_APP_TMDB_API_KEY;
 function ShowWatchlist({ watchlist, onRemove, onSelect }) {
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchGenres = async () => {
@@ -21,11 +23,33 @@ function ShowWatchlist({ watchlist, onRemove, onSelect }) {
     fetchGenres();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedGenre, watchlist]);
+
   const filteredWatchlist = selectedGenre
     ? watchlist.filter((show) =>
         show.genre_ids && show.genre_ids.includes(parseInt(selectedGenre))
       )
     : watchlist;
+
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(filteredWatchlist.length / itemsPerPage);
+  const currentShows = filteredWatchlist.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <Box pt={6}>
@@ -46,8 +70,9 @@ function ShowWatchlist({ watchlist, onRemove, onSelect }) {
       {filteredWatchlist.length === 0 ? (
         <Text>No shows in your watchlist yet.</Text>
       ) : (
+        <>
         <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={6}>
-          {filteredWatchlist.map((show) => (
+          {currentShows.map((show) => (
             <TVCard
               key={show.id}
               show={show}
@@ -57,6 +82,18 @@ function ShowWatchlist({ watchlist, onRemove, onSelect }) {
             />
           ))}
         </SimpleGrid>
+          <HStack spacing={4} justify="center" mt={8} mb={10}>
+            <Button onClick={handlePrevPage} isDisabled={currentPage === 1} aria-label="Previous Page">
+              <ChevronLeftIcon />
+            </Button>
+            <Text>
+              {currentPage} of {totalPages}
+            </Text>
+            <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} aria-label="Next Page">
+              <ChevronRightIcon />
+            </Button>
+          </HStack>
+        </>
       )}
     </Box>
   );
