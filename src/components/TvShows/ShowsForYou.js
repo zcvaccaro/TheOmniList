@@ -63,6 +63,7 @@ function ShowsForYou({ watchlist, onAdd, onRemove, onClick }) {
               ? `https://image.tmdb.org/t/p/w500${s.poster_path}`
               : 'https://via.placeholder.com/200x300?text=No+Image',
             vote_average: s.vote_average || null,
+            vote_count: s.vote_count,
             genre_ids: s.genre_ids || [],
           })).filter(rec => !currentRecIds.has(rec.id));
 
@@ -109,14 +110,14 @@ function ShowsForYou({ watchlist, onAdd, onRemove, onClick }) {
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(prev => prev + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(prev => prev - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -124,15 +125,16 @@ function ShowsForYou({ watchlist, onAdd, onRemove, onClick }) {
 
   // Save scroll position before triggering add
   const handleAdd = (show) => {
-    sessionStorage.setItem('forYouScrollPos', window.scrollY);
+    const scrollContainer = document.getElementById('main-content');
+    sessionStorage.setItem('forYouScrollPos', scrollContainer ? scrollContainer.scrollTop : 0);
     onAdd(show);
   };
 
   // Restore scroll position once on mount
   useEffect(() => {
     const savedPos = sessionStorage.getItem('forYouScrollPos');
-    if (savedPos) {
-      window.scrollTo(0, parseInt(savedPos, 10));
+    if (savedPos && document.getElementById('main-content')) {
+      document.getElementById('main-content').scrollTo(0, parseInt(savedPos, 10));
       sessionStorage.removeItem('forYouScrollPos');
     }
   }, []);

@@ -6,16 +6,13 @@ import {
   Button,
   VStack,
   HStack,
+  Icon,
 } from '@chakra-ui/react';
 import { StarIcon } from '@chakra-ui/icons';
 
 function MovieCard({ movie, onAdd, onRemove, onClick, inWatchlist }) {
-  const renderStars = (rating) => {
-    const fullStars = Math.round(rating);
-    return [...Array(10)].map((_, i) => (
-      <StarIcon key={i} color={i < fullStars ? 'yellow.400' : 'gray.300'} />
-    ));
-  };
+  const rating = movie.rating || movie.vote_average;
+  const ratingCount = movie.vote_count || 0;
 
   return (
     <Box
@@ -41,7 +38,18 @@ function MovieCard({ movie, onAdd, onRemove, onClick, inWatchlist }) {
         <Text fontWeight="bold" textAlign="center" noOfLines={2}>
           {movie.title}
         </Text>
-        <HStack spacing={1}>{renderStars(movie.rating || 0)}</HStack>
+        <HStack spacing={1}>
+          {rating > 0 ? (
+            <>
+              <Icon as={StarIcon} color="yellow.400" w={3} h={3} />
+              <Text fontSize="xs" color="gray.500">
+                {rating} ({ratingCount})
+              </Text>
+            </>
+          ) : (
+            <Text fontSize="xs" color="gray.400">No ratings</Text>
+          )}
+        </HStack>
 
       </VStack>
 

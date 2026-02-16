@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { Container, VStack, SimpleGrid, useToast, Spinner, Text, useColorMode, HStack, Button } from '@chakra-ui/react';
+import { Container, VStack, SimpleGrid, useToast, Spinner, Text, useColorMode, HStack, Button, Flex, Box } from '@chakra-ui/react';
 
 import Homepage from './components/Homepage';
 import Header from './components/Header';
@@ -304,160 +304,165 @@ function App() {
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(prev => prev + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(prev => prev - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   return (
     <Router>
       {needsNav && <NavigateToSearch onNavigate={() => setNeedsNav(false)} />}
-      <Header onSearch={handleSearch} />
+      
+      <Flex direction="column" h="100vh" overflow="hidden">
+        <Header onSearch={handleSearch} />
 
-      <Container maxW="container.xl" overflowX="hidden">
-        <Routes>
-          <Route path="/" element={<Homepage />} />
+        <Box flex="1" overflowY="auto" id="main-content">
+          <Container maxW="container.xl" overflowX="hidden">
+            <Routes>
+              <Route path="/" element={<Homepage />} />
 
-          <Route
-            path="/movies/foryou"
-            element={<MovieForYou
-                watchlist={movieWatchlist}
-                onAddToWatchlist={handleAddMovieToWatchlist}
-                onRemoveFromWatchlist={handleRemoveMovieFromWatchlist}
-                onSelect={setSelectedMovie}
-              />}
-          />
+              <Route
+                path="/movies/foryou"
+                element={<MovieForYou
+                    watchlist={movieWatchlist}
+                    onAddToWatchlist={handleAddMovieToWatchlist}
+                    onRemoveFromWatchlist={handleRemoveMovieFromWatchlist}
+                    onSelect={setSelectedMovie}
+                  />}
+              />
 
-          <Route
-            path="/movies/watchlist"
-            element={<MovieWatchlist
-                watchlist={movieWatchlist}
-                onRemove={handleRemoveMovieFromWatchlist}
-                onSelect={setSelectedMovie}
-              />}
-          />
+              <Route
+                path="/movies/watchlist"
+                element={<MovieWatchlist
+                    watchlist={movieWatchlist}
+                    onRemove={handleRemoveMovieFromWatchlist}
+                    onSelect={setSelectedMovie}
+                  />}
+              />
 
-          <Route
-            path="/movies/upcoming"
-            element={<MovieUpcomingReleases
-                watchlist={movieWatchlist}
-                onAddToWatchlist={handleAddMovieToWatchlist}
-                onRemoveFromWatchlist={handleRemoveMovieFromWatchlist}
-                onSelect={setSelectedMovie}
-              />}
-          />
+              <Route
+                path="/movies/upcoming"
+                element={<MovieUpcomingReleases
+                    watchlist={movieWatchlist}
+                    onAddToWatchlist={handleAddMovieToWatchlist}
+                    onRemoveFromWatchlist={handleRemoveMovieFromWatchlist}
+                    onSelect={setSelectedMovie}
+                  />}
+              />
 
-          {/* TV Show Routes */}
-          <Route
-            path="/tvshows/foryou"
-            element={<ShowsForYou
-                watchlist={showWatchlist}
-                onAdd={handleAddShowToWatchlist}
-                onRemove={handleRemoveShowFromWatchlist}
-                onClick={setSelectedShow}
-              />}
-          />
-          <Route
-            path="/tvshows/popular"
-            element={<ShowPopular
-                watchlist={showWatchlist}
-                onAdd={handleAddShowToWatchlist}
-                onRemove={handleRemoveShowFromWatchlist}
-                onClick={setSelectedShow}
-              />}
-          />
-          <Route
-            path="/tvshows/watchlist"
-            element={<ShowWatchlist
-                watchlist={showWatchlist}
-                onRemove={handleRemoveShowFromWatchlist}
-                onSelect={setSelectedShow}
-              />}
-          />
+              {/* TV Show Routes */}
+              <Route
+                path="/tvshows/foryou"
+                element={<ShowsForYou
+                    watchlist={showWatchlist}
+                    onAdd={handleAddShowToWatchlist}
+                    onRemove={handleRemoveShowFromWatchlist}
+                    onClick={setSelectedShow}
+                  />}
+              />
+              <Route
+                path="/tvshows/popular"
+                element={<ShowPopular
+                    watchlist={showWatchlist}
+                    onAdd={handleAddShowToWatchlist}
+                    onRemove={handleRemoveShowFromWatchlist}
+                    onClick={setSelectedShow}
+                  />}
+              />
+              <Route
+                path="/tvshows/watchlist"
+                element={<ShowWatchlist
+                    watchlist={showWatchlist}
+                    onRemove={handleRemoveShowFromWatchlist}
+                    onSelect={setSelectedShow}
+                  />}
+              />
 
-          {/* Book Routes */}
-          <Route
-            path="/books/foryou"
-            element={<BooksForYou
-                readingList={readingList}
-                onAdd={handleAddBookToWatchlist}
-                onRemove={handleRemoveBookFromWatchlist}
-                onClick={handleSelectBook}
-              />}
-          />
-          <Route
-            path="/books/bestsellers"
-            element={<BestsellersList
-                onAdd={handleAddBookToWatchlist}
-                onRemove={handleRemoveBookFromWatchlist}
-                onClick={handleSelectBook}
-                watchlist={readingList}
-              />}
-          />
-          <Route
-            path="/books/watchlist"
-            element={<ReadingList
-              watchlist={readingList}
-              onRemove={handleRemoveBookFromWatchlist}
-              onSelect={handleSelectBook}
-            />}
-          />
+              {/* Book Routes */}
+              <Route
+                path="/books/foryou"
+                element={<BooksForYou
+                    readingList={readingList}
+                    onAdd={handleAddBookToWatchlist}
+                    onRemove={handleRemoveBookFromWatchlist}
+                    onClick={handleSelectBook}
+                  />}
+              />
+              <Route
+                path="/books/bestsellers"
+                element={<BestsellersList
+                    onAdd={handleAddBookToWatchlist}
+                    onRemove={handleRemoveBookFromWatchlist}
+                    onClick={handleSelectBook}
+                    watchlist={readingList}
+                  />}
+              />
+              <Route
+                path="/books/watchlist"
+                element={<ReadingList
+                  watchlist={readingList}
+                  onRemove={handleRemoveBookFromWatchlist}
+                  onSelect={handleSelectBook}
+                />}
+              />
 
-          {/* Optional: Add search results page or keep search results on home */}
-          <Route
-            path="/search"
-            element={
-              isSearchLoading ? (
-                <VStack justify="center" align="center" height="50vh">
-                  <Spinner size="xl" />
-                  <Text>Searching...</Text>
-                </VStack>
-              ) : (
-                <VStack spacing={6} pt={6} pb={10} overflowX="hidden">
-                  <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={6} w="100%">
-                    {currentSearchResults.map((item) => (
-                      <SearchResultCard
-                        key={`${item.type}-${item.id || item.isbn}`}
-                        item={item}
-                        onAdd={() => handleAddItemToWatchlist(item)}
-                        onRemove={(itemToRemove) => {
-                          if (itemToRemove.type === 'movie') handleRemoveMovieFromWatchlist(itemToRemove.id);
-                          if (itemToRemove.type === 'tv') handleRemoveShowFromWatchlist(itemToRemove.id);
-                          if (itemToRemove.type === 'book') handleRemoveBookFromWatchlist(itemToRemove.isbn);
-                        }}
-                        onClick={handleSelectItem}
-                        inWatchlist={
-                          (item.type === 'movie' && movieWatchlistIds.has(item.id)) ||
-                          (item.type === 'tv' && showWatchlistIds.has(item.id)) ||
-                          (item.type === 'book' && readingListIsbns.has(item.isbn))
-                        }
-                      />
-                    ))}
-                  </SimpleGrid>
-                  
-                  <HStack spacing={4} justify="center" mt={8} mb={10}>
-                    <Button onClick={handlePrevPage} isDisabled={currentPage === 1} aria-label="Previous Page">
-                      <ChevronLeftIcon />
-                    </Button>
-                    <Text>
-                      {currentPage} of {totalPages}
-                    </Text>
-                    <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} aria-label="Next Page">
-                      <ChevronRightIcon />
-                    </Button>
-                  </HStack>
-                </VStack>
-              )
-            }
-          />
-        </Routes>
-      </Container>
+              {/* Optional: Add search results page or keep search results on home */}
+              <Route
+                path="/search"
+                element={
+                  isSearchLoading ? (
+                    <VStack justify="center" align="center" height="50vh">
+                      <Spinner size="xl" />
+                      <Text>Searching...</Text>
+                    </VStack>
+                  ) : (
+                    <VStack spacing={6} pt={6} pb={10} overflowX="hidden">
+                      <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={6} w="100%">
+                        {currentSearchResults.map((item) => (
+                          <SearchResultCard
+                            key={`${item.type}-${item.id || item.isbn}`}
+                            item={item}
+                            onAdd={() => handleAddItemToWatchlist(item)}
+                            onRemove={(itemToRemove) => {
+                              if (itemToRemove.type === 'movie') handleRemoveMovieFromWatchlist(itemToRemove.id);
+                              if (itemToRemove.type === 'tv') handleRemoveShowFromWatchlist(itemToRemove.id);
+                              if (itemToRemove.type === 'book') handleRemoveBookFromWatchlist(itemToRemove.isbn);
+                            }}
+                            onClick={handleSelectItem}
+                            inWatchlist={
+                              (item.type === 'movie' && movieWatchlistIds.has(item.id)) ||
+                              (item.type === 'tv' && showWatchlistIds.has(item.id)) ||
+                              (item.type === 'book' && readingListIsbns.has(item.isbn))
+                            }
+                          />
+                        ))}
+                      </SimpleGrid>
+                      
+                      <HStack spacing={4} justify="center" mt={8} mb={10}>
+                        <Button onClick={handlePrevPage} isDisabled={currentPage === 1} aria-label="Previous Page">
+                          <ChevronLeftIcon />
+                        </Button>
+                        <Text>
+                          {currentPage} of {totalPages}
+                        </Text>
+                        <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} aria-label="Next Page">
+                          <ChevronRightIcon />
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  )
+                }
+              />
+            </Routes>
+          </Container>
+        </Box>
+      </Flex>
 
       {selectedMovie && (
         <MovieModal

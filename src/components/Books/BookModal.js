@@ -54,7 +54,7 @@ const BookModal = ({ book, isOpen, onClose, onAddToWatchlist, onRemoveFromWatchl
                 {book.averageRating ? (
                   <>
                     <Icon as={StarIcon} color="yellow.400" />
-                    <Text>{book.averageRating} / 5 ({book.ratingsCount || 0} ratings)</Text>
+                    <Text>{book.averageRating * 2} / 10 ({book.ratingsCount || 0} ratings)</Text>
                   </>
                 ) : (
                   <Text color="gray.500">Not Rated</Text>

@@ -6,8 +6,11 @@ import {
   Button,
   VStack,
   Tooltip,
+  HStack,
+  Icon,
   useColorModeValue,
 } from '@chakra-ui/react';
+import { StarIcon } from '@chakra-ui/icons';
 
 const SearchResultCard = ({ item, onAdd, onRemove, onClick, inWatchlist }) => {
   const bgColor = useColorModeValue('gray.100', 'gray.700');
@@ -28,6 +31,11 @@ const SearchResultCard = ({ item, onAdd, onRemove, onClick, inWatchlist }) => {
   const image = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : item.coverImage;
   const subText = item.type === 'book' ? `by ${item.author}` : `(${item.release_date?.substring(0, 4) || item.first_air_date?.substring(0, 4) || 'N/A'})`;
   
+  const rating = item.type === 'book' 
+    ? (item.averageRating ? item.averageRating * 2 : 0) 
+    : (item.vote_average || item.rating || 0);
+  const ratingCount = item.ratingsCount || item.vote_count;
+
   let buttonText;
   if (item.type === 'book') {
     buttonText = 'Add to Reading List';
@@ -57,6 +65,18 @@ const SearchResultCard = ({ item, onAdd, onRemove, onClick, inWatchlist }) => {
           <Text fontSize="sm" color="gray.500" isTruncated width="100%">
             {subText}
           </Text>
+          <HStack spacing={1}>
+            {rating > 0 ? (
+              <>
+                <Icon as={StarIcon} color="yellow.400" w={3} h={3} />
+                <Text fontSize="xs" color="gray.500">
+                  {rating} ({ratingCount})
+                </Text>
+              </>
+            ) : (
+              <Text fontSize="xs" color="gray.400">No ratings</Text>
+            )}
+          </HStack>
           {inWatchlist ? (
             <Button size="sm" colorScheme="red" onClick={handleRemove} width="100%">
               Remove

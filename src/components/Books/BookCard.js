@@ -52,8 +52,8 @@ const BookCard = ({ book, onAdd, onClick, onRemove, isWatchlist, inWatchlist }) 
             {book.averageRating > 0 ? (
               <>
                 <Icon as={StarIcon} color="yellow.400" w={3} h={3} />
-                <Text fontSize="xs" color="gray.600">
-                  {book.averageRating} ({book.ratingsCount})
+                <Text fontSize="xs" color="gray.500">
+                  {book.averageRating * 2} ({book.ratingsCount})
                 </Text>
               </>
             ) : (

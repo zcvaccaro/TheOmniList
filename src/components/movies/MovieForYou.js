@@ -63,6 +63,7 @@ function MovieForYou({ watchlist, onAddToWatchlist, onRemoveFromWatchlist, onSel
               ? `https://image.tmdb.org/t/p/w500${m.poster_path}`
               : 'https://via.placeholder.com/200x300?text=No+Image',
             rating: m.vote_average || null,
+            vote_count: m.vote_count,
             genre_ids: m.genre_ids || [],
           })).filter(rec => !currentRecIds.has(rec.id));
 
@@ -109,14 +110,14 @@ function MovieForYou({ watchlist, onAddToWatchlist, onRemoveFromWatchlist, onSel
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(prev => prev + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(prev => prev - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -124,15 +125,16 @@ function MovieForYou({ watchlist, onAddToWatchlist, onRemoveFromWatchlist, onSel
 
   // Save scroll position before triggering add
   const handleAdd = (movie) => {
-    sessionStorage.setItem('forYouScrollPos', window.scrollY);
+    const scrollContainer = document.getElementById('main-content');
+    sessionStorage.setItem('forYouScrollPos', scrollContainer ? scrollContainer.scrollTop : 0);
     onAddToWatchlist(movie);
   };
 
   // Restore scroll position once on mount
   useEffect(() => {
     const savedPos = sessionStorage.getItem('forYouScrollPos');
-    if (savedPos) {
-      window.scrollTo(0, parseInt(savedPos, 10));
+    if (savedPos && document.getElementById('main-content')) {
+      document.getElementById('main-content').scrollTo(0, parseInt(savedPos, 10));
       sessionStorage.removeItem('forYouScrollPos');
     }
   }, []);

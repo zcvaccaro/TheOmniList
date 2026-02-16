@@ -6,16 +6,13 @@ import {
   Button,
   VStack,
   HStack,
+  Icon,
 } from '@chakra-ui/react';
 import { StarIcon } from '@chakra-ui/icons';
 
 function TVCard({ show, onAdd, onRemove, onClick, inWatchlist }) {
-  const renderStars = (rating) => {
-    const fullStars = Math.round(rating);
-    return [...Array(10)].map((_, i) => (
-      <StarIcon key={i} color={i < fullStars ? 'yellow.400' : 'gray.300'} />
-    ));
-  };
+  const rating = show.vote_average;
+  const ratingCount = show.vote_count || 0;
 
   return (
     <Box
@@ -41,7 +38,18 @@ function TVCard({ show, onAdd, onRemove, onClick, inWatchlist }) {
         <Text fontWeight="bold" textAlign="center" noOfLines={2}>
           {show.name}
         </Text>
-        <HStack spacing={1}>{renderStars(show.vote_average || 0)}</HStack>
+        <HStack spacing={1}>
+          {rating > 0 ? (
+            <>
+              <Icon as={StarIcon} color="yellow.400" w={3} h={3} />
+              <Text fontSize="xs" color="gray.500">
+                {rating} ({ratingCount})
+              </Text>
+            </>
+          ) : (
+            <Text fontSize="xs" color="gray.400">No ratings</Text>
+          )}
+        </HStack>
       </VStack>
 
       {/* Buttons fixed at bottom */}

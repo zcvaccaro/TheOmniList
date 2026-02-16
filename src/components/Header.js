@@ -28,7 +28,7 @@ import {
   MenuList,
   MenuItem,
 } from '@chakra-ui/react';
-import { HamburgerIcon, SunIcon, MoonIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import { HamburgerIcon, SunIcon, MoonIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 
 const searchCategories = [
@@ -67,12 +67,15 @@ function Header({ onSearch }) {
         }
       }
     }
+    else {
+      setQuery('');
+      setSelectedCategory({ id: 'all', name: 'All' });
+    }
   }, [location.pathname]); // Rerun when path changes
 
   const handleSearch = (category) => {
     if (query.trim() && category) {
       onSearch(query.trim(), category);
-      setQuery('');
       if (location.pathname !== '/search') {
         navigate('/search');  // Navigate to /search after searching
       }
@@ -98,7 +101,7 @@ function Header({ onSearch }) {
   };
 
   return (
-    <Box bg="gray.800" color="white" px={4} py={3} position="sticky" top="0" zIndex="1000">
+    <Box bg="gray.800" color="white" px={4} py={3} zIndex="1000">
       {/* Top row: Hamburger, title, and color mode toggle */}
       <Flex align="center" justify="space-between" mb={3}>
         <IconButton
@@ -110,12 +113,29 @@ function Header({ onSearch }) {
           mr={2}
         />
 
-        <Text fontWeight="bold" fontSize="lg" flex="1" textAlign="center" fontFamily="'Orbitron', sans-serif">
-          <RouterLink to="/" onClick={onClose}>
-            OmniList
-          </RouterLink>
-        </Text>
+        <HStack flex="1" justify="center" spacing={8}>
+          <IconButton
+            icon={<ChevronLeftIcon boxSize={6} />}
+            onClick={() => navigate(-1)}
+            variant="ghost"
+            color="white"
+            aria-label="Go back"
+          />
 
+          <Text fontWeight="bold" fontSize="lg" textAlign="center" fontFamily="'Orbitron', sans-serif">
+            <RouterLink to="/" onClick={onClose}>
+              OmniList
+            </RouterLink>
+          </Text>
+
+          <IconButton
+            icon={<ChevronRightIcon boxSize={6} />}
+            onClick={() => navigate(1)}
+            variant="ghost"
+            color="white"
+            aria-label="Go forward"
+          />
+        </HStack>
 
         <IconButton
           aria-label="Toggle color mode"
