@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/TheOmniList/static/css/main.43264640.css",
-    "main.js": "/TheOmniList/static/js/main.2351997d.js",
+    "main.js": "/TheOmniList/static/js/main.9c4dd49e.js",
     "index.html": "/TheOmniList/index.html",
     "main.43264640.css.map": "/TheOmniList/static/css/main.43264640.css.map",
-    "main.2351997d.js.map": "/TheOmniList/static/js/main.2351997d.js.map"
+    "main.9c4dd49e.js.map": "/TheOmniList/static/js/main.9c4dd49e.js.map"
   },
   "entrypoints": [
     "static/css/main.43264640.css",
-    "static/js/main.2351997d.js"
+    "static/js/main.9c4dd49e.js"
   ]
 }
