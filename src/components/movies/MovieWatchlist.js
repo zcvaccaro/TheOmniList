@@ -75,7 +75,11 @@ function MovieWatchlist({ watchlist, onRemove, onSelect }) {
           {currentMovies.map((movie) => (
             <MovieCard
               key={movie.id}
-              movie={movie}
+              movie={{
+                ...movie,
+                poster: movie.poster || (movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : undefined),
+                rating: movie.vote_average,
+              }}
               onRemove={onRemove}
               onClick={() => onSelect(movie)}
               inWatchlist={true}
